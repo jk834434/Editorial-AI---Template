@@ -241,6 +241,20 @@ const App = () => {
     setHistory(prev => prev.slice(0, -1));
   };
 
+  const handleDownload = () => {
+    if (!text.trim()) return;
+    
+    const blob = new Blob([text], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'editorial-ai-draft.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const applyRecommendation = (rec: Recommendation) => {
     if (text.includes(rec.originalText)) {
       addToHistory(text);
@@ -462,6 +476,14 @@ const App = () => {
                                 <UndoIcon />
                             </button>
                         )}
+                        <button 
+                            onClick={handleDownload}
+                            className={`p-1.5 rounded-md transition-all ${!text.trim() ? 'opacity-50 cursor-not-allowed text-[#78716C]' : 'text-[#78716C] hover:text-[#292524] hover:bg-[#E7E5E4]'}`}
+                            title="Download Markdown"
+                            disabled={!text.trim()}
+                        >
+                            <DownloadIcon />
+                        </button>
                         <button 
                             onClick={() => setShowUrlInput(!showUrlInput)}
                             className={`p-1.5 rounded-md transition-all ${showUrlInput ? 'bg-[#292524] text-[#F7F5F0]' : 'text-[#78716C] hover:text-[#292524] hover:bg-[#E7E5E4]'}`}

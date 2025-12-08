@@ -55,7 +55,7 @@ Built with **React**, **Tailwind CSS**, and the **Google Gemini API**.
     API_KEY=your_google_gemini_api_key
     FIRECRAWL_API_KEY=your_firecrawl_api_key
     ```
-    *Note: The application expects `process.env.API_KEY` to be available.*
+    *Note: If using a local `.env` file, ensure it is added to your `.gitignore` to prevent accidentally committing your keys.*
 
 4.  **Run the application**:
     ```bash

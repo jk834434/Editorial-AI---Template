@@ -7,7 +7,8 @@
 **Readiness**: "Fork & Run" compatible.
 - The app is fully functional with client-side logic.
 - External APIs (Gemini, Firecrawl) are integrated.
-- Deployment requires simple environment variable configuration.
+- **Key Management**: API keys are now managed via a client-side settings modal, stored in `localStorage` for the user's session.
+- **Features**: Includes URL scraping, Deep Thinking analysis, Undo/History, and Markdown Export.
 
 ## 2. Runtime & Process Model
 - **Language**: Node.js (v20+)
@@ -24,6 +25,7 @@
 *Currently: In-memory & Local Storage*
 - **Style Guide**: Loaded dynamically from `style_guide.md` at runtime.
 - **History**: Session-based history stack for Undo functionality.
+- **Secrets**: API Keys are stored in browser `localStorage`.
 
 ## 5. External Services
 | Service | Purpose | Integration Method |
@@ -32,12 +34,12 @@
 | **Firecrawl API** | Scraping Markdown from URLs. | REST API (`fetch`) |
 
 ## 6. Replit Secrets & Environment Variables
-**CRITICAL**: These must be set in the "Secrets" tool (Padlock icon) on Replit for the app to function.
+For a purely client-side "Fork & Run" experience, we now allow users to enter keys in the UI. 
+However, for a robust deployment, you can still pre-configure:
 
 | Variable Name | Required | Description |
 | :--- | :--- | :--- |
-| `API_KEY` | **YES** | Google Gemini API Key (AI Studio). Used for all text analysis. |
-| `FIRECRAWL_API_KEY` | **NO** | Firecrawl API Key. Required only for the "Import URL" feature. |
+| `API_KEY` | **OPTIONAL** | Google Gemini API Key. If set, it pre-fills the client. |
 
 *Note: The `style_guide.md` file is NOT a secret; it is part of the repo and defines the AI's behavior.*
 
@@ -53,8 +55,7 @@ Since this is currently a Client-Side App (CSA), there are no backend routes hos
 - `POST https://api.firecrawl.dev/v1/scrape` (Firecrawl)
 
 ## 9. Security & Hardening
-- **API Key Exposure**: Currently, API keys are used client-side (via `process.env` injection or Vite env vars).
-  - *Warning*: For a public production deployment, keys should be proxied through a backend to prevent exposure in the browser network tab.
+- **API Key Exposure**: Keys are stored in the user's browser `localStorage`. This is standard for "Bring Your Own Key" (BYOK) client apps but not for SaaS.
 - **CORS**: Not applicable (client calls external APIs directly).
 
 ## 10. Monitoring & Debugging
