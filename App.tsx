@@ -76,6 +76,8 @@ const App = () => {
   const [geminiApiKey, setGeminiApiKey] = useState("");
   const [firecrawlApiKey, setFirecrawlApiKey] = useState("");
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [forceManualKey, setForceManualKey] = useState(false);
+  const [isProjectConnected, setIsProjectConnected] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
@@ -97,13 +99,19 @@ const App = () => {
         // In AI Studio, keys are often injected via process.env, 
         // but we should check if one is explicitly selected.
         (window as any).aistudio.hasSelectedApiKey().then((hasKey: boolean) => {
+            setIsProjectConnected(hasKey);
             if (hasKey) {
                 // Key is selected, we are good to go on the Gemini front
                 // Still might need Firecrawl key, but we won't block main usage
                 if (storedFirecrawlKey) setFirecrawlApiKey(storedFirecrawlKey);
             } else {
-                // Need to select key
-                setShowWelcomeModal(true);
+                // Need to select key, but also check if user has manually overridden in previous session
+                if (storedGeminiKey) {
+                   setGeminiApiKey(storedGeminiKey);
+                   setForceManualKey(true);
+                } else {
+                   setShowWelcomeModal(true);
+                }
             }
         });
     } else {
@@ -139,25 +147,18 @@ const App = () => {
   }, [showUrlInput]);
 
   const handleSaveKeys = async () => {
-    if ((window as any).aistudio) {
-        // AI Studio Flow
-        try {
-            const hasKey = await (window as any).aistudio.hasSelectedApiKey();
-            if (!hasKey) {
-                 await (window as any).aistudio.openSelectKey();
-            }
-        } catch (e) {
-            console.error("AI Studio Key Selection Failed", e);
-        }
-    } else {
-        // Standard Flow
-        if (geminiApiKey.trim()) {
-            localStorage.setItem('gemini_api_key', geminiApiKey);
-        }
+    // AI Studio: We assume the user has clicked "Connect" if they needed to.
+    // We do NOT check hasSelectedApiKey() here to avoid race conditions causing the modal to stick.
+    // If the key isn't actually selected, the API call will fail with a specific error,
+    // and we will prompt them then.
+    
+    // Save manual key if entered (overrides everything)
+    if (geminiApiKey.trim()) {
+        localStorage.setItem('gemini_api_key', geminiApiKey.trim());
     }
 
     if (firecrawlApiKey.trim()) {
-        localStorage.setItem('firecrawl_api_key', firecrawlApiKey);
+        localStorage.setItem('firecrawl_api_key', firecrawlApiKey.trim());
     }
 
     setShowWelcomeModal(false);
@@ -173,16 +174,32 @@ const App = () => {
     setShowMobileAnalysis(true); 
 
     try {
-      // Pass the state key directly. If empty (AI Studio), service will fallback to process.env
-      await analyzeText(text, mode, styleGuideContent, geminiApiKey);
-      // We need to fetch the result again? No, analyzeText returns it.
-      // Wait, I missed assigning the result in the try block logic above?
-      // Ah, I need to call it and set state.
       const result = await analyzeText(text, mode, styleGuideContent, geminiApiKey);
       setAnalysis(result);
     } catch (e: any) {
       console.error(e);
-      setError(e.message || "An unexpected error occurred during analysis.");
+      // Handle "Requested entity was not found" or Auth failures (Missing/Invalid Key)
+      if (e.message && (
+          e.message.includes("Requested entity was not found") || 
+          e.message.includes("Authentication Failed") ||
+          e.message.includes("API keys are not supported") ||
+          e.message.includes("CREDENTIALS_MISSING")
+      )) {
+        setError("Auth Error: " + e.message);
+        
+        // Critical: Clear bad key state/storage so user isn't trapped in a loop
+        localStorage.removeItem('gemini_api_key');
+        setGeminiApiKey(""); 
+        
+        // Reset connection state as the project/key is evidently invalid
+        setIsProjectConnected(false);
+
+        // Force manual mode on re-open to give user control
+        setForceManualKey(true);
+        setShowWelcomeModal(true);
+      } else {
+        setError(e.message || "An unexpected error occurred during analysis.");
+      }
     } finally {
       setIsAnalyzing(false);
     }
@@ -325,24 +342,75 @@ const App = () => {
                         <label className="block font-sans-tech text-xs font-bold uppercase tracking-wider mb-2 text-[#57534E]">
                             Google Gemini API
                         </label>
-                        {(window as any).aistudio ? (
-                             <button
-                                onClick={() => (window as any).aistudio.openSelectKey()}
-                                className="w-full py-2 bg-[#E7E5E4] hover:bg-white border border-[#D6D3D1] rounded font-sans-tech text-sm text-[#292524] transition-colors"
-                             >
-                                Connect Google Cloud Project
-                             </button>
+                        
+                        {(window as any).aistudio && !forceManualKey ? (
+                             <div className="space-y-3">
+                                 {isProjectConnected ? (
+                                    <div className="flex flex-col gap-2">
+                                        <div className="w-full py-2 bg-[#F0FDF4] border border-green-200 rounded font-sans-tech text-sm text-green-800 flex items-center justify-center gap-2 font-semibold shadow-sm">
+                                            <div className="bg-green-100 p-0.5 rounded-full"><CheckIcon /></div>
+                                            Google Cloud Project Connected
+                                        </div>
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    await (window as any).aistudio.openSelectKey();
+                                                    // State likely remains true, but re-selecting is harmless
+                                                } catch (err) {
+                                                    console.error(err);
+                                                }
+                                            }}
+                                            className="text-[10px] text-[#78716C] hover:text-[#292524] underline underline-offset-2 font-sans-tech text-center"
+                                        >
+                                            Change Project
+                                        </button>
+                                    </div>
+                                 ) : (
+                                    <button
+                                        onClick={async () => {
+                                            try {
+                                                await (window as any).aistudio.openSelectKey();
+                                                setIsProjectConnected(true);
+                                            } catch (err) {
+                                                console.error(err);
+                                            }
+                                        }}
+                                        className="w-full py-2 bg-[#E7E5E4] hover:bg-white border border-[#D6D3D1] rounded font-sans-tech text-sm text-[#292524] transition-colors"
+                                    >
+                                        Connect Google Cloud Project
+                                    </button>
+                                 )}
+                                 
+                                 <button 
+                                    onClick={() => setForceManualKey(true)}
+                                    className="w-full text-center text-[10px] text-[#78716C] hover:text-[#292524] underline underline-offset-2 font-sans-tech"
+                                 >
+                                    Or enter API Key manually
+                                 </button>
+                             </div>
                         ) : (
-                            <input 
-                                type="password" 
-                                value={geminiApiKey}
-                                onChange={(e) => setGeminiApiKey(e.target.value)}
-                                placeholder="Enter your Gemini API Key"
-                                className="w-full p-3 bg-white border border-[#D6D3D1] rounded font-mono-edit text-sm focus:outline-none focus:border-[#292524]"
-                            />
+                            <div>
+                                <input 
+                                    type="password" 
+                                    value={geminiApiKey}
+                                    onChange={(e) => setGeminiApiKey(e.target.value)}
+                                    placeholder="Enter your Gemini API Key"
+                                    className="w-full p-3 bg-white border border-[#D6D3D1] rounded font-mono-edit text-sm focus:outline-none focus:border-[#292524]"
+                                />
+                                {(window as any).aistudio && (
+                                    <button 
+                                        onClick={() => setForceManualKey(false)}
+                                        className="text-[10px] text-[#78716C] hover:text-[#292524] underline underline-offset-2 mt-1 font-sans-tech"
+                                     >
+                                        Switch back to Project Selector
+                                     </button>
+                                )}
+                            </div>
                         )}
                         <p className="text-[10px] text-[#A8A29E] mt-1.5 font-sans-tech">
-                           {(window as any).aistudio ? "Select a billed project to enable Deep Reasoning." : "Required for text analysis."}
+                           {forceManualKey 
+                             ? "Using a manual key overrides the connected project." 
+                             : ((window as any).aistudio ? "Select a billed project to enable Deep Reasoning." : "Required for text analysis.")}
                         </p>
                     </div>
 
@@ -575,7 +643,7 @@ const App = () => {
                 </div>
                 <h3 className="font-sans-tech text-lg font-medium mb-2 uppercase tracking-wide text-red-900">Analysis Error</h3>
                 <p className="font-serif-display text-xl max-w-md leading-normal text-red-800 mb-6">
-                   {error.includes("xhr") || error.includes("fetch") ? "The connection timed out while the AI was thinking deep. Please try again." : "Something went wrong with the AI service."}
+                   {error}
                 </p>
                 <button 
                     onClick={handleAnalyze}
@@ -583,6 +651,14 @@ const App = () => {
                 >
                     Try Again
                 </button>
+                <div className="mt-4">
+                    <button 
+                        onClick={() => setShowWelcomeModal(true)}
+                        className="text-xs text-[#78716C] underline hover:text-[#292524] font-sans-tech"
+                    >
+                        Check Settings / API Key
+                    </button>
+                </div>
             </div>
         )}
 

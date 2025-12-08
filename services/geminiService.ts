@@ -36,19 +36,75 @@ async function retryOperation<T>(operation: () => Promise<T>, retries = 2, delay
   try {
     return await operation();
   } catch (error: any) {
-    // Retry on 5xx errors or network-related XHR errors (code 6/aborted)
-    const isRetryable = error.status >= 500 || 
-                        error.message?.includes('xhr') || 
-                        error.message?.includes('fetch') ||
-                        error.message?.includes('network') ||
-                        error.message?.includes('aborted');
+    // Attempt to extract useful info from various error shapes (SDK objects, raw JSON, etc.)
+    let status = error.status || error.code || 0;
+    let message = error.message || '';
+    let detailsStr = '';
+
+    // Handle nested error objects from Google API (e.g. { error: { code: 401, message: ..., details: [...] } })
+    if (error.error) {
+        status = error.error.code || status;
+        message = error.error.message || message;
+        if (error.error.details) {
+            detailsStr = JSON.stringify(error.error.details);
+        }
+    }
+
+    if (typeof error === 'string') {
+        message = error;
+    }
+    
+    // Check for JSON string in message (sometimes SDK wraps the JSON in the message prop)
+    try {
+        if (message && typeof message === 'string' && message.trim().startsWith('{')) {
+            const parsed = JSON.parse(message);
+            if (parsed.error) {
+                status = parsed.error.code || status;
+                message = parsed.error.message || message;
+                if (parsed.error.details) {
+                    detailsStr = JSON.stringify(parsed.error.details);
+                }
+            }
+        }
+    } catch (e) { /* ignore parse error */ }
+
+    // Identify Client/Auth errors
+    // 401: Unauthenticated, 403: Forbidden
+    const isClientError = status >= 400 && status < 500;
+    
+    // Explicitly check for Auth/Project errors to fail fast
+    // We check both the message and the detailed error reason codes
+    if (message.includes("Requested entity was not found") || 
+        message.includes("API keys are not supported") || 
+        message.includes("CREDENTIALS_MISSING") ||
+        message.includes("UNAUTHENTICATED") ||
+        detailsStr.includes("CREDENTIALS_MISSING") ||
+        status === 401 || 
+        status === 403) {
+        
+        // Throw a specific, clean error for the UI to handle
+        const authError = new Error("Authentication Failed: The selected Project likely does not support API Keys (Organization Policy). Please switch to a different Project or enter a valid API Key manually.");
+        (authError as any).status = 401;
+        throw authError;
+    }
+
+    // Only retry on network/server errors (5xx) or transient fetch issues
+    const isRetryable = status >= 500 || 
+                        message.includes('xhr') || 
+                        message.includes('fetch') ||
+                        message.includes('network') ||
+                        message.includes('aborted');
                         
     if (retries > 0 && isRetryable) {
-      console.warn(`Gemini API Error: ${error.message}. Retrying in ${delay}ms...`);
+      console.warn(`Gemini API Error: ${message}. Retrying in ${delay}ms...`);
       await new Promise(resolve => setTimeout(resolve, delay));
       return retryOperation(operation, retries - 1, delay * 2);
     }
-    throw error;
+    
+    // If not retryable or retries exhausted, throw a clean error
+    const finalError = new Error(message || "Unknown API Error");
+    (finalError as any).status = status;
+    throw finalError;
   }
 }
 
@@ -58,8 +114,15 @@ export const analyzeText = async (
   styleGuideContent: string,
   explicitApiKey?: string
 ): Promise<AnalysisResponse> => {
-  // Use explicit key if provided (manual entry), otherwise fall back to process.env (AI Studio injection)
-  const apiKey = explicitApiKey || process.env.API_KEY;
+  // Safely retrieve env key (handle browsers where process might be undefined)
+  const envKey = (typeof process !== 'undefined' && process.env) ? process.env.API_KEY : undefined;
+  
+  // Use explicit key if provided, otherwise fall back to environment
+  let apiKey = explicitApiKey || envKey;
+  
+  if (apiKey) {
+    apiKey = apiKey.trim();
+  }
 
   if (!apiKey) {
     throw new Error("Gemini API Key is missing. Please configure it in the settings.");
@@ -119,8 +182,8 @@ export const analyzeText = async (
       }
 
       return JSON.parse(responseText) as AnalysisResponse;
-    } catch (error) {
-      console.error("Gemini Analysis Request Failed:", error);
+    } catch (error: any) {
+      // Logic moved to retryOperation for consistency, but we catch here to log context if needed
       throw error;
     }
   });
